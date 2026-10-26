@@ -1,13 +1,15 @@
-CÁLCULO DE TELA TENSIONADA — PROTÓTIPO PWA
+CÁLCULO DE TELA TENSIONADA — ATUALIZAÇÃO DE FONTES ATÉ 250 W
 
 Arquivos:
 - index.html: aplicativo e cálculos
 - manifest.webmanifest: configuração instalável
 - sw.js: cache offline
 
+Alteração desta versão:
+- O agrupamento automático limita cada fonte sugerida a no máximo 250 W nominais.
+- A carga de cada grupo considera a reserva configurada.
+- As passadas são agrupadas e coloridas por fonte no diagrama, com identificação das linhas alimentadas.
+- Se uma única passada exceder 250 W com reserva, o aplicativo não inventa uma fonte maior e apresenta um aviso.
+
 IMPORTANTE:
-1. Service workers/PWA normalmente exigem HTTPS ou localhost. Abrir index.html diretamente como arquivo permite testar a interface e cálculos, mas não instala o PWA nem garante o cache offline.
-2. Para instalar no Android/iPhone, publique estes arquivos em hospedagem HTTPS. Abra a URL uma vez com internet, aguarde carregar e use "Adicionar à tela inicial" (iPhone: Compartilhar > Adicionar à Tela de Início; Android: menu do navegador > Instalar/Adicionar à tela inicial).
-3. Projetos são armazenados no localStorage do navegador deste aparelho. Não limpe os dados do navegador sem exportar backup JSON. O histórico não sincroniza automaticamente entre dispositivos.
-4. Versão de teste com diagrama técnico de passadas numeradas, grupos coloridos e fontes lateralizadas. O cálculo geométrico e o dimensionamento de fontes continuam sendo estimativas. Não substituem validação da ficha técnica da fita, fontes, cabos, queda de tensão, proteção elétrica, ventilação e instalação.
-5. A regra geométrica está implementada como distribuição centralizada com espaçamento igual à profundidade, iniciando por uma referência de 5 cm; em telas com dimensões especiais, confirme o critério executivo Lumi Frame.
+Esta é uma ferramenta de pré-dimensionamento. Os valores de potência nominal são candidatos matemáticos, não validação de modelos comerciais específicos. Confirmar disponibilidade comercial e ficha técnica, tensão, potência contínua, corrente, limite de comprimento por trecho, queda de tensão, bitola dos cabos, proteção, ventilação e instalação. A fita periférica não é incluída no agrupamento automático e precisa de dimensionamento separado.

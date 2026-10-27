@@ -64,3 +64,15 @@ V8 — CORREÇÃO EXPLÍCITA DE CAMPOS
 - Modelo de barra: SLED 9150 — monocromática / SLED 9151 — Tunable White.
 - Ao selecionar barras: potência fixa em 12 W/barra, 24 V DC, fluxo rotulado lm/barra e SLED 9150 = 1051 lm/barra conforme a tabela fornecida.
 - Ao selecionar rolo, retorna ao consumo em W/m e fluxo em lm/m.
+
+
+VERSÃO VISUAL PREMIUM V1
+- Identidade atual preservada com azul-marinho, branco, cinza quente e detalhes bronze.
+- Formulário no topo em grade responsiva.
+- Resultados abaixo, com métricas, diagrama amplo e tabelas mais limpas.
+- Mudanças focadas na apresentação; as regras de cálculo não foram intencionalmente alteradas.
+
+
+VERSÃO PREMIUM V2
+- Removida a expressão “Lumi Frame” do subtítulo do cabeçalho.
+- Mantidos os cálculos, os campos e as regras técnicas da versão Premium anterior.

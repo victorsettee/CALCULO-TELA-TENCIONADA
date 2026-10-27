@@ -41,7 +41,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
 <div class="field" id="lengthWrap"><label for="length">Comprimento (m)</label><input id="length" type="number" min="0.01" step="0.01" value="5.50"></div>
 <div class="field" id="widthWrap"><label for="width">Largura (m)</label><input id="width" type="number" min="0.01" step="0.01" value="1.50"></div>
 <div class="field"><label for="depth">Profundidade (cm)</label><input id="depth" type="number" min="1" step="0.1" value="15"></div>
-<div class="field"><label for="ledType">Tipo de iluminação</label><select id="ledType"><option value="roll" selected>Fita LED em rolo (5 m)</option><option value="bar">Barras LED Mister LED Lumina Back (96 cm)</option></select></div>
+<div class="field"><label for="ledType">Tipo de iluminação</label><select id="ledType"><option value="roll" selected>Fita LED em rolo (5 m)</option><option value="bar">Barras LED Mister LED Lumina Back (95 cm)</option></select></div>
 <div class="field" id="barModelWrap" style="display:none"><label for="barModel">Modelo de barra</label><select id="barModel"><option value="9150">SLED 9150 — monocromática</option><option value="9151">SLED 9151 — Tunable White</option></select></div>
 <div class="field"><label for="model">Modelo / marca da fita</label><input id="model" value="Studioluce FT2337"></div>
 <div class="field"><label for="voltage">Tensão</label><select id="voltage"><option value="24">24 V DC</option><option value="12">12 V DC</option></select></div>
@@ -104,13 +104,13 @@ function calculate(){
  } else {
    n=Math.max(1,Math.ceil(a.width/spacing)); actualSpacing=a.width/n; setback=actualSpacing/2;
    positions=Array.from({length:n},(_,i)=>setback+i*actualSpacing);
-   passLengths=positions.map(()=>a.length);passWatts=passLengths.map(l=>isBar?Math.ceil((l-1e-9)/0.96)*12:l*a.wpm);shapeWidth=a.width;shapeLength=a.length;area=a.length*a.width;
+   passLengths=positions.map(()=>a.length);passWatts=passLengths.map(l=>isBar?Math.ceil((l-1e-9)/0.95)*12:l*a.wpm);shapeWidth=a.width;shapeLength=a.length;area=a.length*a.width;
  }
  const passW=passWatts[0]||0, passDesigns=passWatts.map(w=>w*(1+a.reserve/100));
  const general=a.perimeter?a.perim:0, rawLength=passLengths.reduce((s,l)=>s+l,0)+general;
- const barCounts=passLengths.map(l=>isBar?Math.ceil((l-1e-9)/0.96):0);
+ const barCounts=passLengths.map(l=>isBar?Math.ceil((l-1e-9)/0.95):0);
  const totalBars=barCounts.reduce((s,n)=>s+n,0);
- const total=isBar?totalBars*0.96:rawLength;
+ const total=isBar?totalBars*0.95:rawLength;
  const installed=passWatts.reduce((s,w)=>s+w,0)+(isBar?0:general*a.wpm), design=installed*(1+a.reserve/100);
  let groups=[], start=0;
  while(start<n){let count=0, watts=0;while(start+count<n && watts+passDesigns[start+count]<=250+1e-9){watts+=passDesigns[start+count];count++}
@@ -120,9 +120,9 @@ function calculate(){
  groups.push({passIndices:Array.from({length:count},(_,i)=>start+i+1),count,installed:installedGroup,design:designGroup,rating:candidates.length?candidates[0]:null,overLimit:!candidates.length});start+=count;
  }
  const current=(passWatts.reduce((s,w)=>s+w,0)+general*a.wpm)/a.voltage, designCurrent=design/a.voltage, flux=passLengths.reduce((s,l)=>s+l,0)*a.lpm;
- const warnings=[`Reserva de ${fmt(a.reserve,0)}% aplicada à potência total antes do agrupamento das fontes.`,`Tecnologia selecionada: ${isBar?'barras de 96 cm, 12 W/unidade, 24 V DC':'fita em rolo; cálculo por W/m'}.`,`Limite rígido: nenhuma fonte candidata ultrapassa 250 W nominais.`,`Confirmar ficha técnica: corrente, comprimento máximo por trecho, queda de tensão, cabos, proteção e pontos de alimentação.`];
+ const warnings=[`Reserva de ${fmt(a.reserve,0)}% aplicada à potência total antes do agrupamento das fontes.`,`Tecnologia selecionada: ${isBar?'barras de 95 cm, 12 W/unidade, 24 V DC':'fita em rolo; cálculo por W/m'}.`,`Limite rígido: nenhuma fonte candidata ultrapassa 250 W nominais.`,`Confirmar ficha técnica: corrente, comprimento máximo por trecho, queda de tensão, cabos, proteção e pontos de alimentação.`];
  if(round)warnings.push('Tela redonda: comprimentos das passadas calculados pela corda do círculo; espaçamento nominal igual à profundidade e distribuição centralizada.');
- if(isBar)warnings.push('Barras calculadas como unidades inteiras de 96 cm e 12 W cada; o comprimento excedente por passada pode exigir corte/ajuste. Fabricante informa corte a cada 15 cm; validar aplicação, conectores e método de alimentação antes da instalação.');
+ if(isBar)warnings.push('Barras calculadas como unidades inteiras de 95 cm e 12 W cada; o comprimento excedente por passada pode exigir corte/ajuste. Fabricante informa corte a cada 15 cm; validar aplicação, conectores e método de alimentação antes da instalação.');
  if(a.perimeter)warnings.push('Fita periférica incluída na potência geral, mas precisa de dimensionamento e distribuição de alimentação separados.');
  if(groups.some(g=>g.overLimit))warnings.push('ALERTA: uma ou mais passadas não cabem em uma fonte de até 250 W com a reserva aplicada. Não use fonte maior; reveja a especificação ou a carga.');
  last={...a,isBar,barCounts,totalBars,rawLength,round,n,spacing:actualSpacing,setback,positions,passLengths,passWatts,passW,passDesign:passW*(1+a.reserve/100),total,installed,design,current,designCurrent,flux,groups,warnings,general,shapeLength,shapeWidth,area};render(last);
@@ -134,10 +134,10 @@ function render(r){
  metric('Potência instalada',fmt(r.installed)+' W'),metric('Potência com reserva',fmt(r.design)+' W'),metric('Corrente instalada',fmt(r.current)+' A'),
  metric('Corrente de projeto',fmt(r.designCurrent)+' A'),metric('Área da tela',fmt(r.area)+' m²'),metric('Fluxo teórico',fmt(r.flux,0)+' lm')
  ].join('');
- $('passes').innerHTML=`<table><thead><tr><th>Passada</th><th>Comprimento</th>${r.isBar?'<th>Barras (96 cm)</th>':''}<th>Posição desde a borda</th></tr></thead><tbody>${r.positions.map((p,i)=>`<tr><td>${i+1}</td><td>${fmt(r.passLengths[i])} m</td>${r.isBar?`<td>${r.barCounts[i]}</td>`:''}<td>${fmt(p*100)} cm</td></tr>`).join('')}</tbody></table><p class="small">Espaçamento entre eixos: ${fmt(r.spacing*100)} cm · Recuos simétricos: ${fmt(r.setback*100)} cm</p>`;
+ $('passes').innerHTML=`<table><thead><tr><th>Passada</th><th>Comprimento</th>${r.isBar?'<th>Barras (95 cm)</th>':''}<th>Posição desde a borda</th></tr></thead><tbody>${r.positions.map((p,i)=>`<tr><td>${i+1}</td><td>${fmt(r.passLengths[i])} m</td>${r.isBar?`<td>${r.barCounts[i]}</td>`:''}<td>${fmt(p*100)} cm</td></tr>`).join('')}</tbody></table><p class="small">Espaçamento entre eixos: ${fmt(r.spacing*100)} cm · Recuos simétricos: ${fmt(r.setback*100)} cm</p>`;
  $('sources').innerHTML=`<table><thead><tr><th>Fonte</th><th>Passada(s)</th><th>Carga instalada</th><th>Com reserva</th><th>Nominal candidata</th></tr></thead><tbody>${r.groups.map((g,i)=>`<tr><td>${i+1}${g.overLimit?' ⚠':''}</td><td>${g.passIndices.join(', ')}</td><td>${fmt(g.installed)} W</td><td>${fmt(g.design)} W</td><td>${g.rating?g.rating+' W':'SEM CANDIDATA ≤250 W'}</td></tr>`).join('')}</tbody></table><p><b>Total de fontes:</b> ${r.groups.length} · <b>Potência nominal somada:</b> ${fmt(r.groups.reduce((s,g)=>s+(g.rating||0),0))} W</p>`;
  $('memory').innerHTML=`<table><tbody><tr><th>Passadas</th><td>${r.n}</td></tr><tr><th>Comprimento por passada</th><td>${fmt(r.length)} m</td></tr><tr><th>${r.isBar?'Barras inteiras':'Fita nas passadas'}</th><td>${r.isBar?`${r.totalBars} barras × 12 W = ${fmt(r.totalBars*12)} W` : fmt(r.passLengths.reduce((s,l)=>s+l,0))+' m'}</td></tr><tr><th>Fita periférica</th><td>${fmt(r.general)} m</td></tr><tr><th>Potência instalada</th><td>${fmt(r.installed)} W</td></tr><tr><th>Reserva</th><td>${fmt(r.reserve,0)}%</td></tr><tr><th>Potência de projeto</th><td>${fmt(r.design)} W</td></tr><tr><th>Corrente instalada</th><td>${fmt(r.current)} A</td></tr><tr><th>Corrente de projeto</th><td>${fmt(r.designCurrent)} A</td></tr></tbody></table>`;
- $('materials').innerHTML=`<table><tbody><tr><th>Iluminação</th><td>${r.isBar?`${r.totalBars} barras de 96 cm · ${esc(r.model)} · 24 V · 12 W/barra`:`${fmt(r.total)} m · ${esc(r.model)} · ${r.voltage} V · ${fmt(r.wpm)} W/m`}</td></tr><tr><th>Fontes</th><td>${r.groups.length} unidades candidatas; nenhuma acima de 250 W</td></tr><tr><th>Cabos e proteções</th><td>Dimensionar conforme corrente, distância e fabricante</td></tr><tr><th>Perfis e fixações</th><td>Conforme sistema Lumi Frame e projeto executivo</td></tr></tbody></table>`;
+ $('materials').innerHTML=`<table><tbody><tr><th>Iluminação</th><td>${r.isBar?`${r.totalBars} barras de 95 cm · ${esc(r.model)} · 24 V · 12 W/barra`:`${fmt(r.total)} m · ${esc(r.model)} · ${r.voltage} V · ${fmt(r.wpm)} W/m`}</td></tr><tr><th>Fontes</th><td>${r.groups.length} unidades candidatas; nenhuma acima de 250 W</td></tr><tr><th>Cabos e proteções</th><td>Dimensionar conforme corrente, distância e fabricante</td></tr><tr><th>Perfis e fixações</th><td>Conforme sistema Lumi Frame e projeto executivo</td></tr></tbody></table>`;
  $('warnings').innerHTML=r.warnings.map(w=>`<li>${esc(w)}</li>`).join('');
  $('diagram').innerHTML=diagram(r);
 }

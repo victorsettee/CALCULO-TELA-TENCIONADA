@@ -76,3 +76,9 @@ VERSÃO VISUAL PREMIUM V1
 VERSÃO PREMIUM V2
 - Removida a expressão “Lumi Frame” do subtítulo do cabeçalho.
 - Mantidos os cálculos, os campos e as regras técnicas da versão Premium anterior.
+
+
+VERSÃO PREMIUM V3 — CORREÇÃO DO COMPRIMENTO DAS BARRAS
+- Comprimento de referência da barra Mister LED Lumina Back atualizado de 96 cm para 95 cm (0,95 m).
+- Atualizado o texto do seletor, os cálculos de quantidade de barras, potência estimada por passada, comprimento total e tabelas de resultados.
+- Cache offline atualizado para garantir que navegadores recebam a versão nova.

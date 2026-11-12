@@ -37,10 +37,10 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
 <div class="formgrid">
 <div class="field"><label for="project">Cliente / projeto</label><input id="project" placeholder="Ex.: Projeto sala"></div>
 <div class="field"><label for="shape">Formato da tela</label><select id="shape"><option value="rect">Retangular / quadrada</option><option value="round">Redonda</option></select></div>
-<div class="field" id="diamWrap" style="display:none"><label for="diam">Diâmetro (m)</label><input id="diam" type="number" min="0.1" step="0.01" value="1.80"></div>
-<div class="field" id="lengthWrap"><label for="length">Comprimento (m)</label><input id="length" type="number" min="0.01" step="0.01" value="5.50"></div>
-<div class="field" id="widthWrap"><label for="width">Largura (m)</label><input id="width" type="number" min="0.01" step="0.01" value="1.50"></div>
-<div class="field"><label for="depth">Profundidade (cm)</label><input id="depth" type="number" min="1" step="0.1" value="15"></div>
+<div class="field" id="diamWrap" style="display:none"><label for="diam">Diâmetro (m)</label><input id="diam" type="number" min="0.1" step="0.01" placeholder="Informe o diâmetro"></div>
+<div class="field" id="lengthWrap"><label for="length">Comprimento (m)</label><input id="length" type="number" min="0.01" step="0.01" placeholder="Informe o comprimento"></div>
+<div class="field" id="widthWrap"><label for="width">Largura (m)</label><input id="width" type="number" min="0.01" step="0.01" placeholder="Informe a largura"></div>
+<div class="field"><label for="depth">Profundidade (cm)</label><input id="depth" type="number" min="1" step="0.1" placeholder="Informe a profundidade"></div>
 <div class="field"><label for="ledType">Tipo de iluminação</label><select id="ledType"><option value="roll" selected>Fita LED em rolo (5 m)</option><option value="bar">Barras LED Mister LED Lumina Back (95 cm)</option></select></div>
 <div class="field" id="barModelWrap" style="display:none"><label for="barModel">Modelo de barra</label><select id="barModel"><option value="9150">SLED 9150 — monocromática</option><option value="9151">SLED 9151 — Tunable White</option></select></div>
 <div class="field"><label for="model">Modelo / marca da fita</label><input id="model" value="Studioluce FT2337"></div>
@@ -55,7 +55,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
 <div class="field"><label for="spacingMode">Regra de distribuição</label><select id="spacingMode"><option value="depth" selected>Passo pela profundidade</option><option value="manual">Espaçamento manual</option></select></div>
 <div class="field"><label for="manualSpacing">Espaçamento manual (cm)</label><input id="manualSpacing" type="number" min="1" step="0.1" value="15"></div>
 </div>
-<div class="actions"><button class="primary" id="calc">Calcular projeto</button><button id="save">Salvar projeto</button><button id="print">Imprimir / PDF</button><button id="clear" class="danger">Limpar formulário</button></div>
+<div class="actions"><button class="primary" id="calc">Calcular projeto</button><button id="save">Salvar projeto</button><button id="print">Imprimir / PDF</button><button id="clear" class="danger">Limpar medidas</button></div>
 <p class="note">Regra obrigatória: a reserva é aplicada à potência total antes da divisão. Cada fonte sugerida deve ter potência nominal entre 60 W e 250 W, e nunca acima de 250 W. O cálculo é preliminar; confirme fichas técnicas e limites reais de alimentação.</p>
 </section>
 <section class="right">
@@ -85,6 +85,8 @@ const $=id=>document.getElementById(id);
 const fmt=(n,d=2)=>Number(n).toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let last=null;
+function hasMeasures(){const round=$('shape').value==='round';return Number($('depth').value)>0&&(round?Number($('diam').value)>0:Number($('length').value)>0&&Number($('width').value)>0)}
+function clearResults(){last=null;$('metrics').innerHTML='';$('diagram').innerHTML='<p class="small">Informe as medidas da tela e clique em “Calcular projeto” para visualizar o resultado.</p>';$('passes').innerHTML='';$('sources').innerHTML='';$('memory').innerHTML='';$('materials').innerHTML='';$('warnings').innerHTML=''}
 function inputs(){return {project:$('project').value.trim(),ledType:$('ledType').value,barModel:$('barModel').value,depth:Number($('depth').value),length:Number($('length').value),width:Number($('width').value),shape:$('shape').value,diam:Number($('diam').value),model:$('model').value.trim(),voltage:Number($('voltage').value),wpm:Number($('wpm').value),lpm:Number($('lpm').value),reserve:Number($('reserve').value),minSource:Number($('minSource').value),perimeter:$('perimeter').value==='yes',perim:Number($('perim').value)||0,spacingMode:$('spacingMode').value,manualSpacing:Number($('manualSpacing').value)}}
 function calculate(){
  const a=inputs(); const round=a.shape==='round';
@@ -186,16 +188,16 @@ function syncLedFields(){
    $('model').value='Studioluce FT2337'; $('wpm').value='20'; $('lpm').value='2100';
  }
 }
-$('ledType').addEventListener('change',()=>{syncLedFields();calculate()});
-$('barModel').addEventListener('change',()=>{syncLedFields();calculate()});
-$('shape').addEventListener('change',()=>{const round=$('shape').value==='round';$('diamWrap').style.display=round?'flex':'none';$('lengthWrap').style.display=round?'none':'flex';$('widthWrap').style.display=round?'none':'flex';calculate()});
+$('ledType').addEventListener('change',()=>{syncLedFields();if(hasMeasures())calculate();else clearResults()});
+$('barModel').addEventListener('change',()=>{syncLedFields();if(hasMeasures())calculate();else clearResults()});
+$('shape').addEventListener('change',()=>{const round=$('shape').value==='round';$('diamWrap').style.display=round?'flex':'none';$('lengthWrap').style.display=round?'none':'flex';$('widthWrap').style.display=round?'none':'flex';if(hasMeasures())calculate();else clearResults()});
 $('calc').addEventListener('click',calculate);
 $('print').addEventListener('click',()=>{if(!last)calculate();if(last)window.print()});
 $('save').addEventListener('click',()=>{if(!last)calculate();if(!last)return;const list=JSON.parse(localStorage.getItem('ctt_projects_v1')||'[]');list.unshift({savedAt:new Date().toISOString(),result:last});localStorage.setItem('ctt_projects_v1',JSON.stringify(list.slice(0,50)));alert('Projeto salvo neste navegador.');});
-$('clear').addEventListener('click',()=>{if(confirm('Limpar os campos e recomeçar?')){document.querySelectorAll('input').forEach(e=>{if(!e.disabled)e.value=''});$('depth').value=15;$('length').value=5.5;$('width').value=1.5;$('model').value='Studioluce FT2337';$('voltage').value='24';$('wpm').value=20;$('lpm').value=2100;$('reserve').value=25;$('minSource').value='150';$('perimeter').value='no';$('perim').value=0;$('spacingMode').value='depth';$('manualSpacing').value=15;calculate();}});
+$('clear').addEventListener('click',()=>{$('length').value='';$('width').value='';$('diam').value='';$('depth').value='';$('project').value='';clearResults();const round=$('shape').value==='round';(round?$('diam'):$('length')).focus();});
 $('spacingMode').addEventListener('change',()=>{$('manualSpacing').disabled=$('spacingMode').value!=='manual'});
 if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 $('shape').dispatchEvent(new Event('change'));
-calculate();
+clearResults();
 </script>
 </body></html>

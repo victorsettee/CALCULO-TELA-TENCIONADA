@@ -194,7 +194,7 @@ $('shape').addEventListener('change',()=>{const round=$('shape').value==='round'
 $('calc').addEventListener('click',calculate);
 $('print').addEventListener('click',()=>{if(!last)calculate();if(last)window.print()});
 $('save').addEventListener('click',()=>{if(!last)calculate();if(!last)return;const list=JSON.parse(localStorage.getItem('ctt_projects_v1')||'[]');list.unshift({savedAt:new Date().toISOString(),result:last});localStorage.setItem('ctt_projects_v1',JSON.stringify(list.slice(0,50)));alert('Projeto salvo neste navegador.');});
-$('clear').addEventListener('click',()=>{if(confirm('Limpar as medidas para iniciar um novo projeto?')){$('length').value='';$('width').value='';$('diam').value='';$('depth').value='';$('project').value='';clearResults();$('length').focus();}});
+$('clear').addEventListener('click',()=>{$('length').value='';$('width').value='';$('diam').value='';$('depth').value='';$('project').value='';clearResults();const round=$('shape').value==='round';(round?$('diam'):$('length')).focus();});
 $('spacingMode').addEventListener('change',()=>{$('manualSpacing').disabled=$('spacingMode').value!=='manual'});
 if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 $('shape').dispatchEvent(new Event('change'));

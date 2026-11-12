@@ -85,7 +85,7 @@ const $=id=>document.getElementById(id);
 const fmt=(n,d=2)=>Number(n).toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let last=null;
-function hasMeasures(){const round=$('shape').value==='round';return round?Number($('diam').value)>0:Number($('length').value)>0&&Number($('width').value)>0&&Number($('depth').value)>0}
+function hasMeasures(){const round=$('shape').value==='round';return Number($('depth').value)>0&&(round?Number($('diam').value)>0:Number($('length').value)>0&&Number($('width').value)>0)}
 function clearResults(){last=null;$('metrics').innerHTML='';$('diagram').innerHTML='<p class="small">Informe as medidas da tela e clique em “Calcular projeto” para visualizar o resultado.</p>';$('passes').innerHTML='';$('sources').innerHTML='';$('memory').innerHTML='';$('materials').innerHTML='';$('warnings').innerHTML=''}
 function inputs(){return {project:$('project').value.trim(),ledType:$('ledType').value,barModel:$('barModel').value,depth:Number($('depth').value),length:Number($('length').value),width:Number($('width').value),shape:$('shape').value,diam:Number($('diam').value),model:$('model').value.trim(),voltage:Number($('voltage').value),wpm:Number($('wpm').value),lpm:Number($('lpm').value),reserve:Number($('reserve').value),minSource:Number($('minSource').value),perimeter:$('perimeter').value==='yes',perim:Number($('perim').value)||0,spacingMode:$('spacingMode').value,manualSpacing:Number($('manualSpacing').value)}}
 function calculate(){

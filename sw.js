@@ -1,4 +1,4 @@
-const CACHE='ctt-premium-v8-cores-periferica';
+const CACHE='ctt-premium-v9-cor-periferica-retangular';
 const ASSETS=['./','./index.html','./manifest.webmanifest'];
 
 self.addEventListener('install',event=>{

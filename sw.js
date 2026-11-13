@@ -1,4 +1,4 @@
-const CACHE='ctt-premium-v6-perimetro-automatico';
+const CACHE='ctt-premium-v7-pdf-mobile';
 const ASSETS=['./','./index.html','./manifest.webmanifest'];
 
 self.addEventListener('install',event=>{

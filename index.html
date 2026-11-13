@@ -64,7 +64,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
 <div class="field"><label for="spacingMode">Regra de distribuição</label><select id="spacingMode"><option value="depth" selected>Passo pela profundidade</option><option value="manual">Espaçamento manual</option></select></div>
 <div class="field"><label for="manualSpacing">Espaçamento manual (cm)</label><input id="manualSpacing" type="number" min="1" step="0.1" value="15"></div>
 </div>
-<div class="actions"><button class="primary" id="calc">Calcular projeto</button><button id="save">Salvar projeto</button><button id="exportProject">Exportar arquivo</button><button id="importProject">Importar arquivo</button><button id="shareProject">Compartilhar arquivo</button><button id="print">Imprimir / salvar PDF</button><button id="clear" class="danger">Limpar medidas</button></div><input id="projectFile" type="file" accept=".json,application/json" hidden>
+<div class="actions"><button class="primary" id="calc">Calcular projeto</button><button id="save">Salvar projeto</button><button id="print">Gerar / salvar PDF</button><button id="clear" class="danger">Limpar medidas</button></div>
 <p class="note">Regra obrigatória: a reserva é aplicada à potência total antes da divisão. Cada fonte sugerida deve ter potência nominal entre 60 W e 250 W, e nunca acima de 250 W. O cálculo é preliminar; confirme fichas técnicas e limites reais de alimentação.</p>
 </section>
 <section class="right">
@@ -88,7 +88,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
 <div class="card alert"><h2>Alertas e observações técnicas</h2><ul id="warnings"></ul><p class="small">Não constitui validação técnica do fabricante nem substitui projeto elétrico, conferência de cabos, proteções, ventilação e instalação.</p></div>
 </section>
 </main>
-<footer>Cálculo de Tela Tensionada · Os dados salvos ficam neste navegador/dispositivo.</footer>
+<footer>Cálculo de Tela Tensionada · Para guardar ou enviar o memorial, use “Gerar / salvar PDF”.</footer>
 <script>
 const $=id=>document.getElementById(id);
 const fmt=(n,d=2)=>Number(n).toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});
@@ -97,35 +97,6 @@ let last=null;
 function hasMeasures(){const round=$('shape').value==='round';return Number($('depth').value)>0&&(round?Number($('diam').value)>0:Number($('length').value)>0&&Number($('width').value)>0)}
 function clearResults(){last=null;$('metrics').innerHTML='';$('diagram').innerHTML='<p class="small">Informe as medidas da tela e clique em “Calcular projeto” para visualizar o resultado.</p>';$('passes').innerHTML='';$('sources').innerHTML='';$('memory').innerHTML='';$('materials').innerHTML='';$('warnings').innerHTML=''}
 function inputs(){return {project:$('project').value.trim(),ledType:$('ledType').value,barModel:$('barModel').value,depth:Number($('depth').value),length:Number($('length').value),width:Number($('width').value),shape:$('shape').value,diam:Number($('diam').value),model:$('model').value.trim(),voltage:Number($('voltage').value),wpm:Number($('wpm').value),lpm:Number($('lpm').value),reserve:Number($('reserve').value),minSource:Number($('minSource').value),mainEnabled:$('mainEnabled').checked,peripheralEnabled:$('peripheralEnabled').checked,perim:Number($('perim').value)||0,peripheralModel:$('peripheralModel').value.trim(),peripheralVoltage:Number($('peripheralVoltage').value),peripheralWpm:Number($('peripheralWpm').value),peripheralLpm:Number($('peripheralLpm').value),spacingMode:$('spacingMode').value,manualSpacing:Number($('manualSpacing').value)}}
-function projectPayload(){
- const a=inputs();
- return {format:'calculadora-tensionada-projeto',version:1,exportedAt:new Date().toISOString(),project:a};
-}
-function projectFilename(){
- const base=($('project').value.trim()||'projeto-tela-tensionada').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').replace(/[^a-zA-Z0-9_-]+/g,'-').replace(/^-+|-+$/g,'').toLowerCase()||'projeto-tela-tensionada';
- return base+'-'+new Date().toISOString().slice(0,10)+'.json';
-}
-function downloadProject(){
- const blob=new Blob([JSON.stringify(projectPayload(),null,2)],{type:'application/json'});
- const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=projectFilename();document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);
-}
-function applyProject(data){
- if(!data||data.format!=='calculadora-tensionada-projeto'||!data.project||typeof data.project!=='object')throw new Error('Arquivo não reconhecido como projeto da Calculadora Tensionada.');
- const p=data.project;
- const ids=['project','ledType','barModel','depth','length','width','shape','diam','model','voltage','wpm','lpm','reserve','minSource','perim','peripheralModel','peripheralVoltage','peripheralWpm','peripheralLpm','spacingMode','manualSpacing'];
- ids.forEach(id=>{if(Object.prototype.hasOwnProperty.call(p,id)&&$(id))$(id).value=p[id]??'';});
- ['mainEnabled','peripheralEnabled'].forEach(id=>{if(Object.prototype.hasOwnProperty.call(p,id))$(id).checked=!!p[id];});
- $('shape').dispatchEvent(new Event('change'));
- syncLedFields();
- $('spacingMode').dispatchEvent(new Event('change'));
- calculate();
-}
-async function readProjectFile(file){
- if(!file)return;
- try{const data=JSON.parse(await file.text());applyProject(data);alert('Projeto importado. Confira os dados e o resultado na calculadora.');}
- catch(e){alert(e.message||'Não foi possível ler esse arquivo.');}
- $('projectFile').value='';
-}
 function calculate(){
  const a=inputs(); const round=a.shape==='round'; a.perim=round?Math.PI*a.diam:2*(a.length+a.width); $('perim').value=a.peripheralEnabled?fmt(a.perim):'';
  if(!((round?a.diam>0:(a.length>0&&a.width>0))&&a.depth>0)||(!a.mainEnabled&&!a.peripheralEnabled)||(a.mainEnabled&&(a.voltage<=0||a.wpm<=0))||(a.peripheralEnabled&&(a.perim<=0||!a.peripheralModel||a.peripheralVoltage<=0||a.peripheralWpm<=0))||a.reserve<0||a.reserve>100){alert('Confira as medidas, profundidade, tensão, consumo e reserva.');return}
@@ -233,12 +204,8 @@ $('ledType').addEventListener('change',()=>{syncLedFields();if(hasMeasures())cal
 $('barModel').addEventListener('change',()=>{syncLedFields();if(hasMeasures())calculate();else clearResults()});
 $('shape').addEventListener('change',()=>{const round=$('shape').value==='round';$('diamWrap').style.display=round?'flex':'none';$('lengthWrap').style.display=round?'none':'flex';$('widthWrap').style.display=round?'none':'flex';if(hasMeasures())calculate();else clearResults()});
 $('calc').addEventListener('click',calculate);
-$('print').addEventListener('click',()=>{if(!last)calculate();if(last)window.print()});
+$('print').addEventListener('click',()=>{if(!last)calculate();if(last){window.scrollTo(0,0);setTimeout(()=>window.print(),250)}});
 $('save').addEventListener('click',()=>{if(!last)calculate();if(!last)return;const list=JSON.parse(localStorage.getItem('ctt_projects_v1')||'[]');list.unshift({savedAt:new Date().toISOString(),result:last});localStorage.setItem('ctt_projects_v1',JSON.stringify(list.slice(0,50)));alert('Projeto salvo neste navegador.');});
-$('exportProject').addEventListener('click',()=>{if(!last)calculate();if(!last)return;downloadProject();});
-$('importProject').addEventListener('click',()=>$('projectFile').click());
-$('projectFile').addEventListener('change',e=>readProjectFile(e.target.files&&e.target.files[0]));
-$('shareProject').addEventListener('click',async()=>{if(!last)calculate();if(!last)return;const file=new File([JSON.stringify(projectPayload(),null,2)],projectFilename(),{type:'application/json'});try{if(navigator.share&&(!navigator.canShare||navigator.canShare({files:[file]}))){await navigator.share({title:'Projeto de tela tensionada',text:'Arquivo editável do projeto para importar na Calculadora Tensionada.',files:[file]});}else{downloadProject();alert('O compartilhamento de arquivo não está disponível neste navegador. O arquivo foi baixado para você anexar onde quiser.');}}catch(e){if(e.name!=='AbortError'){downloadProject();alert('Não foi possível abrir o compartilhamento. O arquivo foi baixado para você anexar onde quiser.');}}});
 $('clear').addEventListener('click',()=>{$('length').value='';$('width').value='';$('diam').value='';$('depth').value='';$('project').value='';clearResults();const round=$('shape').value==='round';(round?$('diam'):$('length')).focus();});
 $('spacingMode').addEventListener('change',()=>{$('manualSpacing').disabled=$('spacingMode').value!=='manual'});
 if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));

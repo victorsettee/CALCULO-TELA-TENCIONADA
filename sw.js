@@ -1,4 +1,4 @@
-const CACHE='ctt-premium-v4-cache-refresh';
+const CACHE='ctt-premium-v5-iluminacao-dupla';
 const ASSETS=['./','./index.html','./manifest.webmanifest'];
 
 self.addEventListener('install',event=>{

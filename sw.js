@@ -1,4 +1,4 @@
-const CACHE='ctt-premium-v7-pdf-mobile';
+const CACHE='ctt-premium-v8-cores-periferica';
 const ASSETS=['./','./index.html','./manifest.webmanifest'];
 
 self.addEventListener('install',event=>{
